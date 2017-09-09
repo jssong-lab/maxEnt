@@ -114,11 +114,41 @@ def reshapeSamplingOutput(samplingOutput , nbInterpInputs , chainsPerInput  ):
     samplesByInterpInput = (samplingOutput.swapaxes(0,1)).reshape((nbInterpInputs, samplesPerChain*chainsPerInput,
                                                                   seqLen) , order = 'C')
     return  samplesByInterpInput 
-
+    
+def getPenultimeDistanceScaleTensor(outputLayerWeights, outputUnitIdxs  ):
+    """
+    construct the 1d tensor used to scale penultimate activations when calculating distance
+    Inputs:
+        outputLayerWeights - thenao symbolic variable to output layer weights
+        outputIdx_main,
+        outputIdx_comparison - (int)
+    outputs:
+        scaleT - 1d tensor scaling penutimate activations 
+    """
+    if len(outputUnitIdxs) ==1:
+         scaleT = outputLayerWeights.W[:,outputUnitIdxs[0]]
+    else:
+        assert len(outputUnitIdxs)==2
+        scaleT = outputLayerWeights.W[:, outputUnitIdxs[0]] - outputLayerWeights.W[:, outputUnitIdxs[1]]
+    return scaleT
+    
 ######### Class wrapper for collecting MCMC samples given keras sequential model and network inputs #############
 
 class layerSampler(object):
-    def __init__(self , model, beta , mu ,layerIdx, debug = True, s_rng = None , seed = None):
+    def __init__(self , model, beta , mu ,layerIdx, outputUnitIdxs ,  
+                debug = True, s_rng = None , seed = None):
+        """
+        Inputs: 
+            model - keras sequential model
+            beta - positive float
+            mu - (float) natural logrithm of the ratio of G/C frequency genome wide to A/T frequency genome wide
+            layerIdx - (int) index of the hidden layer whose activations constrain maxEnt distribution 
+                            (should be the layer taken as input by the network's output layer)
+            outputUnitIdxs- tuple  of indices of output untis . If length 1 then use weights of corresponding output unit
+                            to scale distances  in space of penultimate acitvations . If length 2 then scale distances in 
+                            space of penultimate acitvations by log( P(outputUnits[0] |x  ) / P(outputUnits[1] |x  ) 
+                            where P( |x) denomts the class probability assigned by the network the interpreted input
+        """
         
         self.inputT = model.input
         self.targetLayer = model.layers[layerIdx]
@@ -126,7 +156,8 @@ class layerSampler(object):
             print "sampling using similarity of represtation at layer {:d} of type {}".format(layerIdx, 
                                                                                           type(self.targetLayer) ) 
         self.targetLayerT = self.targetLayer.output
-        self.scaleT = model.layers[layerIdx +1].W[:,1] ## get reference to weights from target layer to next layer
+        self.scaleT = getPenultimeDistanceScaleTensor(outputLayerWeights = model.layers[layerIdx +1],  
+                                                        outputUnitIdxs=  outputUnitIdxs)
         self.beta = beta
         self.mu = mu
         self.Model = Model(input = self.inputT , output= self.targetLayerT )  ## defines an op taking input layer tensor as input and returning the activation tensor for target hidden layer
