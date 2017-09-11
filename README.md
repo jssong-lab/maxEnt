@@ -17,7 +17,7 @@ Install Keras 1.2.0 using
 pip install keras==1.2.0
 ```
 Then check that your $HOME/.keras/keras.json file contains the lines:
-> "image_dim_ordering": "th",
+> "image_dim_ordering": "th",  
 > "backend": "theano",
 
 ## Using the code
