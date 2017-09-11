@@ -231,7 +231,7 @@ class layerSampler(object):
                                        n_steps = nbSteps)
         samples = results[3][::samplePeriod, :,:]  ## get ntIdxs_current_new entry     
         samplingFunc = theano.function(inputs = [interpInputs , nbSteps, samplePeriod, constrained_ntIdxs , moves ,  K.learning_phase() ],
-                                        outputs = samples , updates= updates )
+                                        outputs = samples , updates= updates , on_unused_input = 'ignore')
         return samplingFunc
           
     def sample(self, interpInputs, constrained_ntIdxs = np.array([0,1] , dtype = np.int32) 
