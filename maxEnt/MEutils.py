@@ -196,7 +196,7 @@ def plotSeqLogo(countsArr, columnLabels = ['G' , 'C' , 'A' , 'T'] ,
             if deleteUnamedLogo: 
                 os.remove(logoFname)
         except:
-            print "Error interfacing with Rweblogo. A transfac motif file has been saved at {} for manual plotting {}".format(transfacMatFname)
+            print "Error interfacing with Rweblogo. A transfac motif file has been saved at {} for manual plotting".format(transfacMatFname)
     return None
     
     
