@@ -174,29 +174,29 @@ def plotSeqLogo(countsArr, columnLabels = ['G' , 'C' , 'A' , 'T'] ,
                     columnLabels = columnLabels, 
                     motifName = "motif_name" , 
                     speciesName= "species_name")
-    ## create the motiflogo
-    webLogoScriptArgs = ["--fi" , transfacMatFname , "--fo" , logoFname , "--outputFormat" ,  logoFormat ] + \
-                        [ elem for key in webLogoKwargs.iterkeys() for elem in [ "--"+key , webLogoKwargs[key]] ]
-    if debug:                    
-        print "arguments to webLogoScript are:\n{}".format( webLogoScriptArgs )
-        p = subprocess.Popen(["Rscript" , webLogoScript ] + webLogoScriptArgs , stdin = subprocess.PIPE , stdout = subprocess.PIPE , stderr = subprocess.PIPE ,
-                            close_fds = True)
-        print "webLogoScripts stdout:\n{}".format(p.stdout.read())
-        print "webLogoScripts stderr:\n{}".format( p.stderr.read() )
-    else:
-        exitStatus = subprocess.call(["Rscript" , webLogoScript ] + webLogoScriptArgs)
-        if exitStatus !=0:
-            raise Exception(webLogoScript + " failed with status {} try calling this function with debug=True".format(exitStatus) )
-   ## add plot to matplotlib axis object if provided
-    if ax is None:
-        print "motif logo saved to {}".format(logoFname)
-    else:
-        try:
+    try:
+        ## create the motiflogo
+        webLogoScriptArgs = ["--fi" , transfacMatFname , "--fo" , logoFname , "--outputFormat" ,  logoFormat ] + \
+                            [ elem for key in webLogoKwargs.iterkeys() for elem in [ "--"+key , webLogoKwargs[key]] ]
+        if debug:                    
+            print "arguments to webLogoScript are:\n{}".format( webLogoScriptArgs )
+            p = subprocess.Popen(["Rscript" , webLogoScript ] + webLogoScriptArgs , stdin = subprocess.PIPE , stdout = subprocess.PIPE , stderr = subprocess.PIPE ,
+                                close_fds = True)
+            print "webLogoScripts stdout:\n{}".format(p.stdout.read())
+            print "webLogoScripts stderr:\n{}".format( p.stderr.read() )
+        else:
+            exitStatus = subprocess.call(["Rscript" , webLogoScript ] + webLogoScriptArgs)
+            if exitStatus !=0:
+                raise Exception(webLogoScript + " failed with status {} try calling this function with debug=True".format(exitStatus) )
+    ## add plot to matplotlib axis object if provided
+        if ax is None:
+            print "motif logo saved to {}".format(logoFname)
+        else:
             addLogoToAx(logoFname  , ax )
             if deleteUnamedLogo: 
                 os.remove(logoFname)
-        except:
-            print "Error interfacing with Rweblogo. A transfac motif file has been saved at {} for manual plotting".format(transfacMatFname)
+    except:
+        print "Error interfacing with Rweblogo. A transfac motif file has been saved at {} for manual plotting".format(transfacMatFname)
     return None
     
     
