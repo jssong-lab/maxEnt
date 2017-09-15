@@ -191,9 +191,12 @@ def plotSeqLogo(countsArr, columnLabels = ['G' , 'C' , 'A' , 'T'] ,
     if ax is None:
         print "motif logo saved to {}".format(logoFname)
     else:
-        addLogoToAx(logoFname  , ax )
-        if deleteUnamedLogo: 
-            os.remove(logoFname)
+        try:
+            addLogoToAx(logoFname  , ax )
+            if deleteUnamedLogo: 
+                os.remove(logoFname)
+        except:
+            print "Error interfacing with Rweblogo. A transfac motif file has been saved at {} for manual plotting {}".format(transfacMatFname)
     return None
     
     
